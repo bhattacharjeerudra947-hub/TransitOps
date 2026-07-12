@@ -7,10 +7,10 @@ import { canAssignVehicle, canAssignDriver, isWithinLoadCapacity, SYSTEM_DATE } 
 // ==========================================================
 let useSupabase = false;
 
-// Helpers to construct unique local IDs
 const generateLocalId = (prefix) => `${prefix}-${Math.random().toString(36).substr(2, 9)}`;
 const delay = (ms = 150) => new Promise(resolve => setTimeout(resolve, ms));
 
+// Only run Supabase if the user has replaced the default placeholders with real keys
 const hasConfig = 
   import.meta.env.VITE_SUPABASE_URL && 
   import.meta.env.VITE_SUPABASE_URL !== 'http://localhost:54321' &&
@@ -20,6 +20,11 @@ const hasConfig =
   import.meta.env.VITE_SUPABASE_ANON_KEY !== 'placeholder-anon-key';
 
 export const checkConnection = async () => {
+  if (!hasConfig) {
+    console.warn('TransitOps: Supabase is not configured. Running in local storage mode.');
+    useSupabase = false;
+    return false;
+  }
   try {
     const { error } = await Promise.race([
       supabase.from('vehicles').select('id').limit(1),
@@ -27,7 +32,7 @@ export const checkConnection = async () => {
     ]);
     if (error) throw error;
     useSupabase = true;
-    console.log('TransitOps: Successfully connected to Supabase.');
+    console.log('TransitOps: Successfully connected to Supabase database.');
     return true;
   } catch (err) {
     console.warn('TransitOps: Supabase connection failed. Falling back to LocalStorage DB:', err.message);
@@ -36,10 +41,10 @@ export const checkConnection = async () => {
   }
 };
 
-// Run check immediately on load
+// Check connection immediately on startup
 checkConnection();
 
-// Expose state to the frontend UI
+// Expose state to the layout dashboard
 export const isUsingSupabase = () => useSupabase;
 
 // ==========================================================
@@ -97,7 +102,6 @@ const mapFrontendTripStatusToDb = (status) => {
   return status.toLowerCase();
 };
 
-// Map vehicle details (including [Region] virtual field in name)
 const mapVehicleFromDb = (dbVeh) => {
   if (!dbVeh) return null;
   let region = 'North';
@@ -142,7 +146,7 @@ const mapDriverFromDb = (dbDrv) => {
     licenseNumber: dbDrv.license_number,
     licenseCategory: dbDrv.license_category,
     licenseExpiryDate: dbDrv.license_expiry_date,
-    contactNumber: dbDrv.phone || '',
+    phone: dbDrv.phone || '',
     safetyScore: Number(dbDrv.safety_score),
     status: mapDbDriverStatusToFrontend(dbDrv.status)
   };
@@ -217,9 +221,8 @@ const mapExpenseFromDb = (dbExp) => {
 };
 
 // ==========================================================
-// 3. Unified API Repository Gated by Connection Status
+// 3. Auth API Endpoints
 // ==========================================================
-
 export const authApi = {
   login: async (email, password) => {
     if (useSupabase) {
@@ -241,7 +244,6 @@ export const authApi = {
         role: mapDbRoleToFrontend(profile.role)
       };
     } else {
-      // LocalStorage Auth
       await delay(100);
       const users = getCollection('users');
       const user = users.find(u => u.email.toLowerCase() === email.toLowerCase());
@@ -291,6 +293,9 @@ export const authApi = {
   }
 };
 
+// ==========================================================
+// 4. Vehicles Registry APIs
+// ==========================================================
 export const vehiclesApi = {
   getAll: async () => {
     if (useSupabase) {
@@ -386,6 +391,9 @@ export const vehiclesApi = {
   }
 };
 
+// ==========================================================
+// 5. Drivers Management APIs
+// ==========================================================
 export const driversApi = {
   getAll: async () => {
     if (useSupabase) {
@@ -446,6 +454,9 @@ export const driversApi = {
   }
 };
 
+// ==========================================================
+// 6. Trips Management & Rules Engine APIs
+// ==========================================================
 export const tripsApi = {
   getAll: async () => {
     if (useSupabase) {
@@ -683,6 +694,9 @@ export const tripsApi = {
   }
 };
 
+// ==========================================================
+// 7. Maintenance Logs APIs
+// ==========================================================
 export const maintenanceApi = {
   getAll: async () => {
     if (useSupabase) {
@@ -797,6 +811,9 @@ export const maintenanceApi = {
   }
 };
 
+// ==========================================================
+// 8. Fuel & Expenses Ledger APIs
+// ==========================================================
 export const fuelExpensesApi = {
   getFuelLogs: async () => {
     if (useSupabase) {

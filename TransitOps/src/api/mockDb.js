@@ -2,10 +2,16 @@
 const STORAGE_PREFIX = 'transitops_db_';
 
 const DEFAULT_USERS = [
+  // Original local storage accounts
   { id: 'usr-1', name: 'Frank Miller', email: 'manager@transitops.com', passwordHash: 'manager123', role: 'Fleet Manager' },
   { id: 'usr-2', name: 'Dave R.', email: 'driver@transitops.com', passwordHash: 'driver123', role: 'Driver' },
   { id: 'usr-3', name: 'Sarah Connor', email: 'safety@transitops.com', passwordHash: 'safety123', role: 'Safety Officer' },
-  { id: 'usr-4', name: 'Fiona Gallagher', email: 'finance@transitops.com', passwordHash: 'finance123', role: 'Financial Analyst' }
+  { id: 'usr-4', name: 'Fiona Gallagher', email: 'finance@transitops.com', passwordHash: 'finance123', role: 'Financial Analyst' },
+  // Supabase seeded accounts (so they also work in offline mode)
+  { id: 'usr-supabase-1', name: 'Alice Manager', email: 'manager@transitops.com', passwordHash: 'password123', role: 'Fleet Manager' },
+  { id: 'usr-supabase-2', name: 'Bob Dispatcher', email: 'dispatcher@transitops.com', passwordHash: 'password123', role: 'Driver' },
+  { id: 'usr-supabase-3', name: 'Charlie Safety', email: 'safety@transitops.com', passwordHash: 'password123', role: 'Safety Officer' },
+  { id: 'usr-supabase-4', name: 'Diana Analyst', email: 'analyst@transitops.com', passwordHash: 'password123', role: 'Financial Analyst' }
 ];
 
 const DEFAULT_VEHICLES = [
