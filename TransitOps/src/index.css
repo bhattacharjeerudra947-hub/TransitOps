@@ -1268,7 +1268,8 @@ body.light-theme .text-violet-400 {
   align-items: center;
   justify-content: center;
   opacity: 0;
-  transition: opacity 0.3s ease;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
   pointer-events: none;
 }
 .login-anim-overlay.driving-in,
@@ -1276,10 +1277,12 @@ body.light-theme .text-violet-400 {
 .login-anim-overlay.crashing,
 .login-anim-overlay.crash-effect {
   opacity: 1;
+  visibility: visible;
   pointer-events: all;
 }
 .login-anim-overlay.resetting {
   opacity: 0;
+  visibility: hidden;
 }
 
 .login-anim-track {

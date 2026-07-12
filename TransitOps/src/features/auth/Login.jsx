@@ -4,12 +4,6 @@ import { useAuth } from '../../context/AuthContext';
 import { Truck, ShieldAlert, Zap, BarChart3, ShieldCheck } from 'lucide-react';
 import truckImage from '../../assets/truckimage.jpg';
 
-const DEMO_ACCOUNTS = [
-  { role: 'Fleet Manager', email: 'manager@transitops.com', password: 'password123' },
-  { role: 'Driver', email: 'dispatcher@transitops.com', password: 'password123' },
-  { role: 'Safety Officer', email: 'safety@transitops.com', password: 'password123' },
-  { role: 'Financial Analyst', email: 'analyst@transitops.com', password: 'password123' }
-];
 
 export default function Login() {
   const { login } = useAuth();
@@ -70,11 +64,6 @@ export default function Login() {
     }
   };
 
-  const handleQuickSelect = (acc) => {
-    setEmail(acc.email);
-    setPassword(acc.password);
-    setError('');
-  };
 
   return (
     <div className="login-container">
@@ -131,27 +120,7 @@ export default function Login() {
             </button>
           </form>
 
-          <div style={{ marginTop: '32px', borderTop: '1px solid rgba(255, 255, 255, 0.08)', paddingTop: '24px' }}>
-            <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', fontWeight: 600, textAlign: 'center', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '12px' }}>
-              Quick Demo Login Profiles
-            </p>
-            <div className="role-switcher-grid">
-              {DEMO_ACCOUNTS.map((acc) => {
-                const isActive = email === acc.email;
-                return (
-                  <button
-                    key={acc.role}
-                    type="button"
-                    className={`role-switcher-btn ${isActive ? 'active' : ''}`}
-                    onClick={() => handleQuickSelect(acc)}
-                  >
-                    <div style={{ fontWeight: 600 }}>{acc.role}</div>
-                    <div style={{ fontSize: '10px', opacity: 0.6, marginTop: '2px' }}>{acc.email}</div>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
+
         </div>
       </div>
       <div className="login-image-side" style={{ backgroundImage: `url(${truckImage})` }}>
@@ -197,49 +166,47 @@ export default function Login() {
         </div>
       </div>
       
-      {animState !== 'idle' && (
-        <div className={`login-anim-overlay ${animState} ${animState === 'crash-effect' ? 'shake-active' : ''}`}>
-          <div className="login-anim-track">
-            <div className="login-anim-road"></div>
-            
-            {/* Cyan Truck (Left to Right) */}
-            <div className="anim-truck-container left-truck">
-              <div className="truck-body">
-                <Truck className="h-16 w-16 text-cyan-400" />
-              </div>
+      <div className={`login-anim-overlay ${animState} ${animState === 'crash-effect' ? 'shake-active' : ''}`}>
+        <div className="login-anim-track">
+          <div className="login-anim-road"></div>
+          
+          {/* Cyan Truck (Left to Right) */}
+          <div className="anim-truck-container left-truck">
+            <div className="truck-body">
+              <Truck className="h-16 w-16 text-cyan-400" />
             </div>
-            
-            {/* Red Truck (Right to Left - enters on crash/collision) */}
-            {(animState === 'crashing' || animState === 'crash-effect') && (
-              <div className="anim-truck-container right-truck">
-                <div className="truck-body">
-                  <Truck className="h-16 w-16 text-red-500" style={{ transform: 'scaleX(-1)' }} />
-                </div>
-              </div>
-            )}
-            
-            {/* Particle Collision effects */}
-            {animState === 'crash-effect' && (
-              <div className="crash-explosion">
-                <div className="spark spark-1" style={{ '--angle': '45deg' }}></div>
-                <div className="spark spark-2" style={{ '--angle': '-45deg' }}></div>
-                <div className="spark spark-3" style={{ '--angle': '135deg' }}></div>
-                <div className="spark spark-4" style={{ '--angle': '-135deg' }}></div>
-                <div className="smoke smoke-1"></div>
-                <div className="smoke smoke-2"></div>
-                <div className="smoke smoke-3"></div>
-              </div>
-            )}
           </div>
           
-          <div className="login-anim-status">
-            {animState === 'driving-in' && <p className="text-cyan-400">Securing vehicle dispatch logs...</p>}
-            {animState === 'success-exit' && <p className="text-emerald-400">Credentials approved. Dispatching fleet...</p>}
-            {animState === 'crashing' && <p className="text-amber-400">Verifying credentials...</p>}
-            {animState === 'crash-effect' && <p className="text-red-500 font-bold">Access Denied! Collision detected.</p>}
-          </div>
+          {/* Red Truck (Right to Left - enters on crash/collision) */}
+          {(animState === 'crashing' || animState === 'crash-effect') && (
+            <div className="anim-truck-container right-truck">
+              <div className="truck-body">
+                <Truck className="h-16 w-16 text-red-500" style={{ transform: 'scaleX(-1)' }} />
+              </div>
+            </div>
+          )}
+          
+          {/* Particle Collision effects */}
+          {animState === 'crash-effect' && (
+            <div className="crash-explosion">
+              <div className="spark spark-1" style={{ '--angle': '45deg' }}></div>
+              <div className="spark spark-2" style={{ '--angle': '-45deg' }}></div>
+              <div className="spark spark-3" style={{ '--angle': '135deg' }}></div>
+              <div className="spark spark-4" style={{ '--angle': '-135deg' }}></div>
+              <div className="smoke smoke-1"></div>
+              <div className="smoke smoke-2"></div>
+              <div className="smoke smoke-3"></div>
+            </div>
+          )}
         </div>
-      )}
+        
+        <div className="login-anim-status">
+          {animState === 'driving-in' && <p className="text-cyan-400">Securing vehicle dispatch logs...</p>}
+          {animState === 'success-exit' && <p className="text-emerald-400">Credentials approved. Dispatching fleet...</p>}
+          {animState === 'crashing' && <p className="text-amber-400">Verifying credentials...</p>}
+          {animState === 'crash-effect' && <p className="text-red-500 font-bold">Access Denied! Collision detected.</p>}
+        </div>
+      </div>
     </div>
   );
 }
