@@ -109,6 +109,26 @@ export const initDb = (force = false) => {
     const storageKey = STORAGE_PREFIX + key;
     if (force || localStorage.getItem(storageKey) === null) {
       localStorage.setItem(storageKey, JSON.stringify(SEED_DATA[key]));
+    } else {
+      // Self-healing database: automatically append missing default seed items
+      try {
+        const stored = JSON.parse(localStorage.getItem(storageKey) || '[]');
+        if (Array.isArray(stored)) {
+          const defaults = SEED_DATA[key];
+          let updated = false;
+          defaults.forEach(defItem => {
+            if (!stored.some(item => item.id === defItem.id)) {
+              stored.push(defItem);
+              updated = true;
+            }
+          });
+          if (updated) {
+            localStorage.setItem(storageKey, JSON.stringify(stored));
+          }
+        }
+      } catch (e) {
+        localStorage.setItem(storageKey, JSON.stringify(SEED_DATA[key]));
+      }
     }
   });
 };
