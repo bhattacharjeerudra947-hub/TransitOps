@@ -14,9 +14,29 @@ export const authApi = {
   login: async (email, password) => {
     await delay(100);
     const users = getCollection('users');
-    const user = users.find(u => u.email.toLowerCase() === email.toLowerCase());
-    if (!user || user.passwordHash !== password) throw new Error('Invalid email or password');
+    const user = users.find(u => u.email.toLowerCase() === email.toLowerCase() && u.passwordHash === password);
+    if (!user) throw new Error('Invalid email or password');
     const { passwordHash, ...userResponse } = user;
+    localStorage.setItem('transitops_local_user', JSON.stringify(userResponse));
+    return userResponse;
+  },
+
+  signup: async (name, email, password, role) => {
+    await delay(100);
+    const users = getCollection('users');
+    const existing = users.find(u => u.email.toLowerCase() === email.toLowerCase());
+    if (existing) throw new Error('A user with this email already exists.');
+    const id = generateLocalId('usr');
+    const newUser = {
+      id,
+      name,
+      email: email.toLowerCase(),
+      passwordHash: password,
+      role
+    };
+    users.push(newUser);
+    saveCollection('users', users);
+    const { passwordHash, ...userResponse } = newUser;
     localStorage.setItem('transitops_local_user', JSON.stringify(userResponse));
     return userResponse;
   },

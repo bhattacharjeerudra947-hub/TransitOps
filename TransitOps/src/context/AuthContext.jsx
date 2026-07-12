@@ -34,6 +34,18 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const signup = async (name, email, password, role) => {
+    setError(null);
+    try {
+      const registeredUser = await authApi.signup(name, email, password, role);
+      setUser(registeredUser);
+      return registeredUser;
+    } catch (err) {
+      setError(err.message || 'Signup failed');
+      throw err;
+    }
+  };
+
   const logout = async () => {
     try {
       await authApi.logout();
@@ -48,6 +60,7 @@ export const AuthProvider = ({ children }) => {
     loading,
     error,
     login,
+    signup,
     logout,
     isAuthenticated: !!user,
     hasRole: (roles) => {

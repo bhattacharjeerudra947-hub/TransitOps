@@ -6,13 +6,16 @@ import truckImage from '../../assets/truckimage.jpg';
 
 
 export default function Login() {
-  const { login } = useAuth();
+  const { login, signup } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [isSignUp, setIsSignUp] = useState(false);
+  const [name, setName] = useState('');
+  const [role, setRole] = useState('Fleet Manager');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -24,7 +27,7 @@ export default function Login() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!email || !password) {
+    if (!email || !password || (isSignUp && !name)) {
       setError('Please fill in all fields');
       return;
     }
@@ -34,12 +37,12 @@ export default function Login() {
     setAnimState('driving-in');
     
     // Concurrently trigger verification and driving animation minimum window
-    const loginPromise = login(email, password);
+    const authPromise = isSignUp ? signup(name, email, password, role) : login(email, password);
     const minDelayPromise = new Promise(resolve => setTimeout(resolve, 900));
     
     try {
       const [authResult] = await Promise.all([
-        loginPromise.then(() => ({ success: true })).catch(err => ({ success: false, error: err })),
+        authPromise.then((res) => ({ success: true, data: res })).catch(err => ({ success: false, error: err })),
         minDelayPromise
       ]);
 
@@ -55,7 +58,7 @@ export default function Login() {
         setAnimState('resetting');
         await new Promise(resolve => setTimeout(resolve, 300)); // fade overlay
         setAnimState('idle');
-        setError(authResult.error.message || 'Invalid credentials. Please try again.');
+        setError(authResult.error.message || 'Authentication failed. Please try again.');
         setLoading(false);
       }
     } catch (err) {
@@ -86,6 +89,21 @@ export default function Login() {
           )}
 
           <form onSubmit={handleSubmit}>
+            {isSignUp && (
+              <div className="form-group">
+                <label htmlFor="name">Full Name</label>
+                <input
+                  type="text"
+                  id="name"
+                  className="input-field"
+                  placeholder="e.g. Frank Miller"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  required
+                />
+              </div>
+            )}
+
             <div className="form-group">
               <label htmlFor="email">Email Address</label>
               <input
@@ -137,16 +155,65 @@ export default function Login() {
               </div>
             </div>
 
+            {isSignUp && (
+              <div className="form-group">
+                <label htmlFor="role">Platform Role</label>
+                <select
+                  id="role"
+                  className="input-field"
+                  value={role}
+                  onChange={(e) => setRole(e.target.value)}
+                  style={{
+                    width: '100%',
+                    background: 'rgba(255, 255, 255, 0.05)',
+                    border: '1px solid rgba(255, 255, 255, 0.1)',
+                    borderRadius: '8px',
+                    padding: '12px 16px',
+                    color: 'var(--text-primary)',
+                    cursor: 'pointer'
+                  }}
+                >
+                  <option value="Fleet Manager" style={{ background: 'var(--card-bg)', color: 'var(--text-primary)' }}>Fleet Manager</option>
+                  <option value="Driver" style={{ background: 'var(--card-bg)', color: 'var(--text-primary)' }}>Driver</option>
+                  <option value="Safety Officer" style={{ background: 'var(--card-bg)', color: 'var(--text-primary)' }}>Safety Officer</option>
+                  <option value="Financial Analyst" style={{ background: 'var(--card-bg)', color: 'var(--text-primary)' }}>Financial Analyst</option>
+                </select>
+              </div>
+            )}
+
             <button
               type="submit"
               className="btn btn-primary w-full"
               disabled={loading}
+              style={{ marginTop: '16px' }}
             >
-              {loading ? 'Signing In...' : 'Sign In'}
+              {loading ? (isSignUp ? 'Creating Account...' : 'Signing In...') : (isSignUp ? 'Create Account' : 'Sign In')}
             </button>
           </form>
 
-
+          <div style={{ marginTop: '20px', textAlign: 'center', fontSize: '0.875rem' }}>
+            <span style={{ color: 'var(--text-secondary)' }}>
+              {isSignUp ? 'Already have an account? ' : "Don't have an account? "}
+            </span>
+            <button
+              type="button"
+              onClick={() => {
+                setIsSignUp(!isSignUp);
+                setError('');
+              }}
+              style={{
+                background: 'none',
+                border: 'none',
+                color: 'var(--accent)',
+                fontWeight: 600,
+                cursor: 'pointer',
+                padding: '0 4px',
+                textDecoration: 'underline'
+              }}
+            >
+              {isSignUp ? 'Sign In' : 'Sign Up'}
+            </button>
+          </div>
         </div>
       </div>
       <div className="login-image-side" style={{ backgroundImage: `url(${truckImage})` }}>
