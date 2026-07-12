@@ -9,7 +9,7 @@ export default function Login() {
   const { login, signup } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  
+
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -35,11 +35,11 @@ export default function Login() {
     setLoading(true);
     setError('');
     setAnimState('driving-in');
-    
+
     // Concurrently trigger verification and driving animation minimum window
     const authPromise = isSignUp ? signup(name, email, password, role) : login(email, password);
     const minDelayPromise = new Promise(resolve => setTimeout(resolve, 900));
-    
+
     try {
       const [authResult] = await Promise.all([
         authPromise.then((res) => ({ success: true, data: res })).catch(err => ({ success: false, error: err })),
@@ -110,7 +110,7 @@ export default function Login() {
                 type="email"
                 id="email"
                 className="input-field"
-                placeholder="e.g. manager@transitops.com"
+                placeholder="e.g : abc@gmail.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
@@ -165,18 +165,13 @@ export default function Login() {
                   onChange={(e) => setRole(e.target.value)}
                   style={{
                     width: '100%',
-                    background: 'rgba(255, 255, 255, 0.05)',
-                    border: '1px solid rgba(255, 255, 255, 0.1)',
-                    borderRadius: '8px',
-                    padding: '12px 16px',
-                    color: 'var(--text-primary)',
                     cursor: 'pointer'
                   }}
                 >
-                  <option value="Fleet Manager" style={{ background: 'var(--card-bg)', color: 'var(--text-primary)' }}>Fleet Manager</option>
-                  <option value="Driver" style={{ background: 'var(--card-bg)', color: 'var(--text-primary)' }}>Driver</option>
-                  <option value="Safety Officer" style={{ background: 'var(--card-bg)', color: 'var(--text-primary)' }}>Safety Officer</option>
-                  <option value="Financial Analyst" style={{ background: 'var(--card-bg)', color: 'var(--text-primary)' }}>Financial Analyst</option>
+                  <option value="Fleet Manager">Fleet Manager</option>
+                  <option value="Driver">Driver</option>
+                  <option value="Safety Officer">Safety Officer</option>
+                  <option value="Financial Analyst">Financial Analyst</option>
                 </select>
               </div>
             )}
@@ -192,7 +187,7 @@ export default function Login() {
           </form>
 
           <div style={{ marginTop: '20px', textAlign: 'center', fontSize: '0.875rem' }}>
-            <span style={{ color: 'var(--text-secondary)' }}>
+            <span style={{ color: '#475569', fontWeight: 500 }}>
               {isSignUp ? 'Already have an account? ' : "Don't have an account? "}
             </span>
             <button
@@ -204,8 +199,8 @@ export default function Login() {
               style={{
                 background: 'none',
                 border: 'none',
-                color: 'var(--accent)',
-                fontWeight: 600,
+                color: '#1e8614',
+                fontWeight: 700,
                 cursor: 'pointer',
                 padding: '0 4px',
                 textDecoration: 'underline'
@@ -223,10 +218,10 @@ export default function Login() {
           </div>
           <h2>Connect. Coordinate. Control.</h2>
           <p>
-            The next-generation smart transportation platform designed to streamline dispatching, 
+            The next-generation smart transportation platform designed to streamline dispatching,
             reduce operating costs, and empower fleet managers and drivers alike.
           </p>
-          
+
           <div className="login-features-list">
             <div className="login-feature-item">
               <div className="login-feature-icon">
@@ -258,18 +253,18 @@ export default function Login() {
           </div>
         </div>
       </div>
-      
+
       <div className={`login-anim-overlay ${animState} ${animState === 'crash-effect' ? 'shake-active' : ''}`}>
         <div className="login-anim-track">
           <div className="login-anim-road"></div>
-          
+
           {/* Cyan Truck (Left to Right) */}
           <div className="anim-truck-container left-truck">
             <div className="truck-body">
               <Truck className="h-16 w-16 text-cyan-400" />
             </div>
           </div>
-          
+
           {/* Red Truck (Right to Left - enters on crash/collision) */}
           {(animState === 'crashing' || animState === 'crash-effect') && (
             <div className="anim-truck-container right-truck">
@@ -278,7 +273,7 @@ export default function Login() {
               </div>
             </div>
           )}
-          
+
           {/* Particle Collision effects */}
           {animState === 'crash-effect' && (
             <div className="crash-explosion">
@@ -292,7 +287,7 @@ export default function Login() {
             </div>
           )}
         </div>
-        
+
         <div className="login-anim-status">
           {animState === 'driving-in' && <p className="text-cyan-400">Securing vehicle dispatch logs...</p>}
           {animState === 'success-exit' && <p className="text-emerald-400">Credentials approved. Dispatching fleet...</p>}
