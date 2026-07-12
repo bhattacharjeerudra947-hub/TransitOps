@@ -28,6 +28,9 @@ export default function Dashboard() {
   const [regionFilter, setRegionFilter] = useState('All');
   const [statusFilter, setStatusFilter] = useState('All');
 
+  // Hover state for operational cost breakdown chart
+  const [hoveredSegment, setHoveredSegment] = useState(null);
+
   // Load database collections
   const loadData = async () => {
     try {
@@ -287,9 +290,9 @@ export default function Dashboard() {
           </div>
 
           {totalOperationalCost > 0 ? (
-            <div className="flex flex-col items-center justify-center my-6">
+            <div className="relative flex flex-col items-center justify-center my-6">
               {/* Doughnut SVG */}
-              <svg width="180" height="180" viewBox="0 0 36 36" className="transform -rotate-90">
+              <svg width="180" height="180" viewBox="0 0 36 36" className="transform -rotate-90" style={{ overflow: 'visible' }}>
                 {/* Background circle */}
                 <circle cx="18" cy="18" r="15.915" fill="none" stroke="rgba(255,255,255,0.03)" strokeWidth="3" />
                 
@@ -297,31 +300,72 @@ export default function Dashboard() {
                 <circle 
                   cx="18" cy="18" r="15.915" fill="none" 
                   stroke="var(--color-primary)" 
-                  strokeWidth="3.2" 
+                  strokeWidth={hoveredSegment?.type === 'fuel' ? '4.5' : '3.2'} 
                   strokeDasharray={`${fuelPct} ${100 - fuelPct}`} 
                   strokeDashoffset="0" 
+                  onMouseEnter={() => setHoveredSegment({ type: 'fuel', name: 'Fuel', pct: fuelPct, value: fuelCostSum, color: 'var(--color-primary)' })}
+                  onMouseLeave={() => setHoveredSegment(null)}
+                  style={{ cursor: 'pointer', transition: 'stroke-width 0.2s ease, stroke 0.2s ease' }}
                 />
                 {/* Maintenance section (Amber) */}
                 <circle 
                   cx="18" cy="18" r="15.915" fill="none" 
                   stroke="var(--color-warning)" 
-                  strokeWidth="3.2" 
+                  strokeWidth={hoveredSegment?.type === 'maint' ? '4.5' : '3.2'} 
                   strokeDasharray={`${maintPct} ${100 - maintPct}`} 
                   strokeDashoffset={-fuelPct} 
+                  onMouseEnter={() => setHoveredSegment({ type: 'maint', name: 'Maintenance', pct: maintPct, value: maintCostSum, color: 'var(--color-warning)' })}
+                  onMouseLeave={() => setHoveredSegment(null)}
+                  style={{ cursor: 'pointer', transition: 'stroke-width 0.2s ease, stroke 0.2s ease' }}
                 />
                 {/* Expenses section (Purple) */}
                 <circle 
                   cx="18" cy="18" r="15.915" fill="none" 
                   stroke="var(--color-secondary)" 
-                  strokeWidth="3.2" 
+                  strokeWidth={hoveredSegment?.type === 'expenses' ? '4.5' : '3.2'} 
                   strokeDasharray={`${expPct} ${100 - expPct}`} 
                   strokeDashoffset={-(fuelPct + maintPct)} 
+                  onMouseEnter={() => setHoveredSegment({ type: 'expenses', name: 'Tolls & Other', pct: expPct, value: expenseCostSum, color: 'var(--color-secondary)' })}
+                  onMouseLeave={() => setHoveredSegment(null)}
+                  style={{ cursor: 'pointer', transition: 'stroke-width 0.2s ease, stroke 0.2s ease' }}
                 />
               </svg>
               
-              <div className="text-center mt-3">
-                <span className="text-xs text-slate-400">Total Cost</span>
-                <div className="text-xl font-bold text-slate-200">${totalOperationalCost.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</div>
+              {/* Centered text inside the donut */}
+              <div 
+                className="absolute flex flex-col items-center justify-center pointer-events-none" 
+                style={{ 
+                  top: '50%', 
+                  left: '50%', 
+                  transform: 'translate(-50%, -50%)', 
+                  width: '110px', 
+                  height: '110px', 
+                  borderRadius: '50%',
+                  textAlign: 'center'
+                }}
+              >
+                {hoveredSegment ? (
+                  <>
+                    <span style={{ fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.05em', color: hoveredSegment.color, fontWeight: '700' }}>
+                      {hoveredSegment.name}
+                    </span>
+                    <div style={{ fontSize: '1.25rem', fontWeight: '800', color: 'var(--text-primary)', margin: '2px 0' }}>
+                      {hoveredSegment.pct}%
+                    </div>
+                    <span style={{ fontSize: '10px', color: 'var(--text-secondary)', fontWeight: '500' }}>
+                      ${hoveredSegment.value.toLocaleString()}
+                    </span>
+                  </>
+                ) : (
+                  <>
+                    <span style={{ fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--text-muted)', fontWeight: '600' }}>
+                      Total Cost
+                    </span>
+                    <div style={{ fontSize: '1.15rem', fontWeight: '800', color: 'var(--text-primary)', margin: '2px 0' }}>
+                      ${Math.round(totalOperationalCost).toLocaleString()}
+                    </div>
+                  </>
+                )}
               </div>
             </div>
           ) : (

@@ -21,6 +21,9 @@ export default function Login() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
+  // Animation states: 'idle' | 'driving-in' | 'success-exit' | 'crashing' | 'crash-effect' | 'resetting'
+  const [animState, setAnimState] = useState('idle');
+
   // Where to navigate after successful login
   const from = location.state?.from?.pathname || '/';
 
@@ -33,13 +36,36 @@ export default function Login() {
 
     setLoading(true);
     setError('');
+    setAnimState('driving-in');
+    
+    // Concurrently trigger verification and driving animation minimum window
+    const loginPromise = login(email, password);
+    const minDelayPromise = new Promise(resolve => setTimeout(resolve, 900));
     
     try {
-      await login(email, password);
-      navigate(from, { replace: true });
+      const [authResult] = await Promise.all([
+        loginPromise.then(() => ({ success: true })).catch(err => ({ success: false, error: err })),
+        minDelayPromise
+      ]);
+
+      if (authResult.success) {
+        setAnimState('success-exit');
+        await new Promise(resolve => setTimeout(resolve, 900)); // wait for exit drive offscreen
+        navigate(from, { replace: true });
+      } else {
+        setAnimState('crashing');
+        await new Promise(resolve => setTimeout(resolve, 500)); // wait for red truck collision
+        setAnimState('crash-effect');
+        await new Promise(resolve => setTimeout(resolve, 1000)); // crash rumble, smoke, sparks
+        setAnimState('resetting');
+        await new Promise(resolve => setTimeout(resolve, 300)); // fade overlay
+        setAnimState('idle');
+        setError(authResult.error.message || 'Invalid credentials. Please try again.');
+        setLoading(false);
+      }
     } catch (err) {
-      setError(err.message || 'Invalid credentials. Please try again.');
-    } finally {
+      setAnimState('idle');
+      setError('An unexpected error occurred.');
       setLoading(false);
     }
   };
@@ -170,6 +196,50 @@ export default function Login() {
           </div>
         </div>
       </div>
+      
+      {animState !== 'idle' && (
+        <div className={`login-anim-overlay ${animState} ${animState === 'crash-effect' ? 'shake-active' : ''}`}>
+          <div className="login-anim-track">
+            <div className="login-anim-road"></div>
+            
+            {/* Cyan Truck (Left to Right) */}
+            <div className="anim-truck-container left-truck">
+              <div className="truck-body">
+                <Truck className="h-16 w-16 text-cyan-400" />
+              </div>
+            </div>
+            
+            {/* Red Truck (Right to Left - enters on crash/collision) */}
+            {(animState === 'crashing' || animState === 'crash-effect') && (
+              <div className="anim-truck-container right-truck">
+                <div className="truck-body">
+                  <Truck className="h-16 w-16 text-red-500" style={{ transform: 'scaleX(-1)' }} />
+                </div>
+              </div>
+            )}
+            
+            {/* Particle Collision effects */}
+            {animState === 'crash-effect' && (
+              <div className="crash-explosion">
+                <div className="spark spark-1" style={{ '--angle': '45deg' }}></div>
+                <div className="spark spark-2" style={{ '--angle': '-45deg' }}></div>
+                <div className="spark spark-3" style={{ '--angle': '135deg' }}></div>
+                <div className="spark spark-4" style={{ '--angle': '-135deg' }}></div>
+                <div className="smoke smoke-1"></div>
+                <div className="smoke smoke-2"></div>
+                <div className="smoke smoke-3"></div>
+              </div>
+            )}
+          </div>
+          
+          <div className="login-anim-status">
+            {animState === 'driving-in' && <p className="text-cyan-400">Securing vehicle dispatch logs...</p>}
+            {animState === 'success-exit' && <p className="text-emerald-400">Credentials approved. Dispatching fleet...</p>}
+            {animState === 'crashing' && <p className="text-amber-400">Verifying credentials...</p>}
+            {animState === 'crash-effect' && <p className="text-red-500 font-bold">Access Denied! Collision detected.</p>}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

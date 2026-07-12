@@ -279,23 +279,23 @@ export default function ExpensesList() {
         {/* Ledger & Log Views */}
         <div className="col-8 card flex flex-col p-0 overflow-hidden">
           {/* Tab Navigation header */}
-          <div className="flex border-b border-slate-800 bg-slate-950/40 p-1">
+          <div className="ledger-tabs-header">
             <button 
-              className={`flex-1 py-3 px-4 font-semibold text-xs rounded-t-lg transition-colors flex items-center justify-center gap-2 ${activeTab === 'ledger' ? 'bg-[#0f162a] border border-b-0 border-slate-800 text-cyan-400' : 'text-slate-400 hover:text-slate-200'}`}
+              className={`ledger-tab-btn ${activeTab === 'ledger' ? 'active' : ''}`}
               onClick={() => setActiveTab('ledger')}
             >
               <FileText className="h-4 w-4" />
               <span>Cumulative Ledger Rollup</span>
             </button>
             <button 
-              className={`flex-1 py-3 px-4 font-semibold text-xs rounded-t-lg transition-colors flex items-center justify-center gap-2 ${activeTab === 'fuel' ? 'bg-[#0f162a] border border-b-0 border-slate-800 text-cyan-400' : 'text-slate-400 hover:text-slate-200'}`}
+              className={`ledger-tab-btn ${activeTab === 'fuel' ? 'active' : ''}`}
               onClick={() => setActiveTab('fuel')}
             >
               <Fuel className="h-4 w-4" />
               <span>Recent Fuel Logs ({fuelLogs.length})</span>
             </button>
             <button 
-              className={`flex-1 py-3 px-4 font-semibold text-xs rounded-t-lg transition-colors flex items-center justify-center gap-2 ${activeTab === 'expenses' ? 'bg-[#0f162a] border border-b-0 border-slate-800 text-cyan-400' : 'text-slate-400 hover:text-slate-200'}`}
+              className={`ledger-tab-btn ${activeTab === 'expenses' ? 'active' : ''}`}
               onClick={() => setActiveTab('expenses')}
             >
               <Landmark className="h-4 w-4" />
@@ -314,8 +314,8 @@ export default function ExpensesList() {
                 {/* Ledger View */}
                 {activeTab === 'ledger' && (
                   <div className="space-y-4">
-                    <div className="text-xs text-slate-400 flex items-center gap-1.5 p-2.5 rounded bg-cyan-950/10 border border-cyan-900/30 text-cyan-300">
-                      <HelpCircle className="h-4 w-4 flex-shrink-0" />
+                    <div className="ledger-info-banner">
+                      <HelpCircle className="h-4.5 w-4.5 flex-shrink-0" />
                       <span>This ledger computes Total Operational Cost per vehicle from fuel, maintenance, and expense ledgers combined.</span>
                     </div>
                     
@@ -340,7 +340,7 @@ export default function ExpensesList() {
                               <td className="text-cyan-400 font-semibold">${item.fuelCost.toLocaleString(undefined, {minimumFractionDigits: 2})}</td>
                               <td className="text-amber-500 font-semibold">${item.maintenanceCost.toLocaleString(undefined, {minimumFractionDigits: 2})}</td>
                               <td className="text-violet-400 font-semibold">${item.expenseCost.toLocaleString(undefined, {minimumFractionDigits: 2})}</td>
-                              <td className="text-right text-sm font-bold text-slate-100">${item.totalCost.toLocaleString(undefined, {minimumFractionDigits: 2})}</td>
+                              <td className="text-right text-sm font-bold ledger-total-cost">${item.totalCost.toLocaleString(undefined, {minimumFractionDigits: 2})}</td>
                             </tr>
                           ))}
                         </tbody>
