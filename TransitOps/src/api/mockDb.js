@@ -1,5 +1,7 @@
 // Mock Database Engine using LocalStorage
 const STORAGE_PREFIX = 'transitops_db_';
+const DB_VERSION_KEY = 'transitops_db_version';
+const CURRENT_VERSION = '2.2';
 
 const DEFAULT_USERS = [
   // Original local storage accounts
@@ -36,12 +38,13 @@ const DEFAULT_DRIVERS = [
 ];
 
 const DEFAULT_TRIPS = [
-  { id: 'trp-1', source: 'Warehouse A (North)', destination: 'Distribution Center 1', vehicleId: 'veh-2', driverId: 'drv-2', cargoWeightKg: 2800, plannedDistanceKm: 180, actualDistanceKm: 0, fuelConsumed: 0, status: 'Dispatched', createdAt: '2026-07-11T09:30:00Z', completedAt: null, revenue: 550 },
-  { id: 'trp-2', source: 'Port East', destination: 'Warehouse B (South)', vehicleId: 'veh-1', driverId: 'drv-1', cargoWeightKg: 450, plannedDistanceKm: 120, actualDistanceKm: 125, fuelConsumed: 15.5, status: 'Completed', createdAt: '2026-07-10T08:00:00Z', completedAt: '2026-07-10T11:45:00Z', revenue: 400 },
-  { id: 'trp-3', source: 'Factory West', destination: 'Retail Hub 4', vehicleId: 'veh-4', driverId: 'drv-3', cargoWeightKg: 3000, plannedDistanceKm: 340, actualDistanceKm: 0, fuelConsumed: 0, status: 'Draft', createdAt: '2026-07-12T06:00:00Z', completedAt: null, revenue: 900 },
-  { id: 'trp-4', source: 'Warehouse B (South)', destination: 'Retail Hub 1', vehicleId: 'veh-8', driverId: 'drv-7', cargoWeightKg: 1200, plannedDistanceKm: 210, actualDistanceKm: 0, fuelConsumed: 0, status: 'Dispatched', createdAt: '2026-07-12T08:15:00Z', completedAt: null, revenue: 600 },
-  { id: 'trp-5', source: 'Warehouse A (North)', destination: 'Factory West', vehicleId: 'veh-4', driverId: 'drv-5', cargoWeightKg: 2500, plannedDistanceKm: 150, actualDistanceKm: 152, fuelConsumed: 22.4, status: 'Completed', createdAt: '2026-07-09T10:00:00Z', completedAt: '2026-07-09T13:30:00Z', revenue: 450 },
-  { id: 'trp-6', source: 'Retail Hub 4', destination: 'Port East', vehicleId: 'veh-6', driverId: 'drv-6', cargoWeightKg: 1800, plannedDistanceKm: 90, actualDistanceKm: 88, fuelConsumed: 11.2, status: 'Completed', createdAt: '2026-07-08T14:00:00Z', completedAt: '2026-07-08T16:15:00Z', revenue: 300 }
+  { id: 'trp-1', source: 'Warehouse A (North)', destination: 'Distribution Center 1', vehicleId: 'veh-2', driverId: 'drv-2', cargoWeightKg: 2800, plannedDistanceKm: 180, actualDistanceKm: 0, fuelConsumed: 0, status: 'Dispatched', createdAt: '2026-07-11T09:30:00Z', completedAt: null, revenue: 36500 },
+  { id: 'trp-2', source: 'Port East', destination: 'Warehouse B (South)', vehicleId: 'veh-1', driverId: 'drv-1', cargoWeightKg: 450, plannedDistanceKm: 120, actualDistanceKm: 125, fuelConsumed: 15.5, status: 'Completed', createdAt: '2026-07-10T08:00:00Z', completedAt: '2026-07-10T11:45:00Z', revenue: 18400 },
+  { id: 'trp-3', source: 'Factory West', destination: 'Retail Hub 4', vehicleId: 'veh-4', driverId: 'drv-3', cargoWeightKg: 3000, plannedDistanceKm: 340, actualDistanceKm: 0, fuelConsumed: 0, status: 'Draft', createdAt: '2026-07-12T06:00:00Z', completedAt: null, revenue: 29500 },
+  { id: 'trp-4', source: 'Warehouse B (South)', destination: 'Retail Hub 1', vehicleId: 'veh-8', driverId: 'drv-7', cargoWeightKg: 1200, plannedDistanceKm: 210, actualDistanceKm: 0, fuelConsumed: 0, status: 'Dispatched', createdAt: '2026-07-12T08:15:00Z', completedAt: null, revenue: 31000 },
+  { id: 'trp-5', source: 'Warehouse A (North)', destination: 'Factory West', vehicleId: 'veh-4', driverId: 'drv-5', cargoWeightKg: 2500, plannedDistanceKm: 150, actualDistanceKm: 152, fuelConsumed: 22.4, status: 'Completed', createdAt: '2026-07-09T10:00:00Z', completedAt: '2026-07-09T13:30:00Z', revenue: 29500 },
+  { id: 'trp-6', source: 'Retail Hub 4', destination: 'Port East', vehicleId: 'veh-6', driverId: 'drv-6', cargoWeightKg: 1800, plannedDistanceKm: 90, actualDistanceKm: 88, fuelConsumed: 11.2, status: 'Completed', createdAt: '2026-07-08T14:00:00Z', completedAt: '2026-07-08T16:15:00Z', revenue: 38200 },
+  { id: 'trp-7', source: 'Port East', destination: 'Distribution Center 1', vehicleId: 'veh-2', driverId: 'drv-2', cargoWeightKg: 3200, plannedDistanceKm: 280, actualDistanceKm: 282, fuelConsumed: 48.5, status: 'Completed', createdAt: '2026-07-07T09:00:00Z', completedAt: '2026-07-07T14:30:00Z', revenue: 36500 }
 ];
 
 const DEFAULT_MAINTENANCE = [
@@ -80,9 +83,19 @@ const SEED_DATA = {
 
 // Initialize DB if not present
 export const initDb = (force = false) => {
+  const version = localStorage.getItem(DB_VERSION_KEY);
+  const needsReset = version !== CURRENT_VERSION;
+
+  if (needsReset) {
+    Object.keys(SEED_DATA).forEach(key => {
+      localStorage.removeItem(STORAGE_PREFIX + key);
+    });
+    localStorage.setItem(DB_VERSION_KEY, CURRENT_VERSION);
+  }
+
   Object.keys(SEED_DATA).forEach(key => {
     const storageKey = STORAGE_PREFIX + key;
-    if (force || localStorage.getItem(storageKey) === null) {
+    if (force || needsReset || localStorage.getItem(storageKey) === null) {
       localStorage.setItem(storageKey, JSON.stringify(SEED_DATA[key]));
     } else {
       // Self-healing database: automatically append missing default seed items

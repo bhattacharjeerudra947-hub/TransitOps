@@ -114,31 +114,8 @@ export default function Layout() {
             <button className="md:hidden text-slate-200" onClick={toggleMobileMenu}>
               <Menu className="h-6 w-6" />
             </button>
-            <div className="header-title-section" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
+            <div className="header-title-section">
               <h1>TransitOps</h1>
-              <span className="database-status" style={{
-                fontSize: '0.75rem',
-                padding: '0.2rem 0.6rem',
-                borderRadius: '9999px',
-                fontWeight: 600,
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '0.35rem',
-                background: isUsingSupabase() ? 'rgba(16, 185, 129, 0.1)' : 'rgba(245, 158, 11, 0.1)',
-                color: isUsingSupabase() ? '#10b981' : '#f59e0b',
-                border: isUsingSupabase() ? '1px solid rgba(16, 185, 129, 0.2)' : '1px solid rgba(245, 158, 11, 0.2)',
-                marginTop: '2px'
-              }}>
-                <span className="status-dot" style={{
-                  width: '6px',
-                  height: '6px',
-                  borderRadius: '50%',
-                  background: isUsingSupabase() ? '#10b981' : '#f59e0b',
-                  boxShadow: isUsingSupabase() ? '0 0 8px #10b981' : '0 0 8px #f59e0b',
-                  display: 'inline-block'
-                }}></span>
-                {isUsingSupabase() ? 'Supabase Connected' : 'Offline Demo Mode'}
-              </span>
             </div>
           </div>
 
